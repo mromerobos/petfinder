@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "567757414420",
+    "firebase_url": "https://petfinder-618c7-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "petfinder-618c7",
+    "storage_bucket": "petfinder-618c7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567757414420:android:6bb2c99bb7563c072f4701",
+        "android_client_info": {
+          "package_name": "uoc.edu.petfinder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567757414420-n12jb0qse92frsrc9582742qu5879d5q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uoc.edu.petfinder",
+            "certificate_hash": "904091e6560b74b19b6af41201eef2e18549a078"
+          }
+        },
+        {
+          "client_id": "567757414420-1nrrsi1jmd92mcnlkbt31qmstdh0di7g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCStM9As6Z1tHRSSejFlOIWqOwldW0Elmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567757414420-1nrrsi1jmd92mcnlkbt31qmstdh0di7g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
