@@ -4,6 +4,7 @@ import 'package:petfinder/commons/custom_alert.dart';
 import 'package:petfinder/models/announcement.dart';
 import 'package:petfinder/screens/user_screen.dart';
 import 'package:petfinder/services/announcement_service.dart';
+import 'package:petfinder/widgets/donation.dart';
 import 'package:petfinder/widgets/map_search.dart';
 import 'package:petfinder/widgets/normal_search.dart';
 
@@ -58,14 +59,17 @@ class _NavigationScreenState extends State<NavigationScreen> {
             children: [
               NormalSearch(callback: (val) => goToAnnouncement(val)),
               MapSearch(callback: (val) => goToAnnouncement(val)),
-              Container(),
+              Donation(),
             ],
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: FloatingActionButton(
-            onPressed: goToAdd,
-            child: const Icon(Icons.add_comment_outlined),
-            backgroundColor: Colors.green,
+          floatingActionButton: Visibility(
+            visible: currentIndex != 2,
+            child: FloatingActionButton(
+              onPressed: goToAdd,
+              child: const Icon(Icons.add_comment_outlined),
+              backgroundColor: Colors.green,
+            ),
           ),
         ),
       ),

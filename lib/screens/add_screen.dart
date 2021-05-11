@@ -31,7 +31,6 @@ class AddScreen extends StatefulWidget {
 }
 
 class _AddScreenState extends State<AddScreen> {
-
   final ImagePicker _picker = ImagePicker();
   final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
   final CustomLoading customLoading = CustomLoading();
@@ -46,8 +45,8 @@ class _AddScreenState extends State<AddScreen> {
 
   bool isAdd = true;
   String announce_id = '';
-  double lat = 41.922253;
-  double lon = 2.800897;
+  double lat = 0.0;
+  double lon = 0.0;
 
   DateTime currentDate = DateTime.now();
 
@@ -63,8 +62,6 @@ class _AddScreenState extends State<AddScreen> {
         ModalRoute.of(context)!.settings.arguments as AddScreenArguments;
     isAdd = args!.isAdd;
     if (!isAdd) announce_id = args.id;
-    lat = userService.userCustom.latitude;
-    lon = userService.userCustom.longitude;
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -142,12 +139,15 @@ class _AddScreenState extends State<AddScreen> {
                   ),
                   IconButtonWithMaterial(
                       icon: Icons.add_location_alt_outlined,
-                      onPressed: updateUbication),
+                      onPressed: () => updateUbication()),
                 ],
               ),
               Row(
                 children: [
-                  Text('Last location: ', style: sectionText,),
+                  Text(
+                    'Last location: ',
+                    style: sectionText,
+                  ),
                   Coordinates(lat: lat, lon: lon),
                 ],
               ),
@@ -174,9 +174,7 @@ class _AddScreenState extends State<AddScreen> {
                 ),
               ),
               LoginButton(
-                  text: 'Save',
-                  color: Colors.blue,
-                  onTap: () => saveAction())
+                  text: 'Save', color: Colors.blue, onTap: () => saveAction())
             ],
           ),
         ),
@@ -224,17 +222,15 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   updateUbication() async {
-    Position? pos = await Geolocator.getLastKnownPosition();
-    if (pos != null) {
-      setState(() {
-        lat = pos.latitude;
-        lon = pos.longitude;
-      });
-    }
+    Position pos = await Geolocator.getCurrentPosition();
+    setState(() {
+      lat = pos.latitude;
+      lon = pos.longitude;
+    });
   }
 
   saveAction() {
-    if(isAdd) {
+    if (isAdd) {
       saveAnnouncement();
     } else {
       saveComment();

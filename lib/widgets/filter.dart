@@ -7,10 +7,12 @@ import 'package:petfinder/widgets/icon_button_material.dart';
 class Filter extends StatefulWidget {
   Filter(
       {Key? key,
+        required this.loading,
       required this.onPressed})
       : super(key: key);
 
   final OnSearchCallback onPressed;
+  final bool loading;
 
   @override
   _FilterState createState() => _FilterState();
@@ -137,12 +139,14 @@ class _FilterState extends State<Filter> {
           borderRadius: BorderRadius.circular(5)),
       padding: EdgeInsets.all(5.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            '  Expand the filter',
-            style: sectionText,
+          Expanded(
+            child: Text(
+              '  Expand the filter',
+              style: sectionText,
+            ),
           ),
+          if(widget.loading) Container(width: 15, height: 15, child: CircularProgressIndicator()),
           iconButton(Icons.keyboard_arrow_down, false)
         ],
       ),

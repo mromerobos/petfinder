@@ -31,7 +31,7 @@ class _NormalSearchState extends State<NormalSearch> with AutomaticKeepAliveClie
     super.build(context);
     return Column(
       children: [
-        Filter(onPressed: (String? text, int? radius, DateTime? from, DateTime? to) => searchAction(text, radius, from, to)),
+        Filter(loading: false, onPressed: (String? text, int? radius, DateTime? from, DateTime? to) => searchAction(text, radius, from, to)),
         Expanded(
           child: (loading)? Center(child: Container(width: 100, height: 100, child: CircularProgressIndicator())) : Container(
             margin: EdgeInsets.all(5),

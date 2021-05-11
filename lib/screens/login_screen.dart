@@ -1,9 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:petfinder/commons/custom_alert.dart';
 import 'package:petfinder/commons/custom_loading.dart';
 import 'package:petfinder/models/user_custom.dart';
@@ -12,6 +15,8 @@ import 'package:petfinder/screens/register_screen.dart';
 import 'package:petfinder/services/user_service.dart';
 import 'package:petfinder/widgets/input_from.dart';
 import 'package:petfinder/widgets/login_button.dart';
+
+import '../main.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String id = 'login_Screen';
@@ -29,6 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
 
+  String? _token;
+
   double latitude = 0;
   double longitude = 0;
   bool loged = false;
@@ -38,6 +45,53 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) => checkLogIn2(context));
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('something recibed?');
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                // ToDO add a proper drawable resource to android, for now using
+                //      one that already exists in example app.
+                icon: 'launch_background',
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      print(message.toString());
+    });
+  }
+
+  Future<void> sendPushMessage() async {
+    if (_token == null) {
+      print('Unable to send FCM message, no token exists.');
+      return;
+    }
+
+    try {
+      await http.post(
+        Uri.parse('https://api.rnfirebase.io/messaging/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: constructFCMPayload(_token!),
+      );
+      print('FCM request for device sent!');
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -110,6 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.all(15.0),
               child: TextButton(
                   onPressed: () => signinPage(),
+                  //onPressed: () => sendPushMessage(),
                   child: Text(
                     'New User? Create Account',
                     style: TextStyle(
@@ -160,9 +215,12 @@ class _LoginScreenState extends State<LoginScreen> {
         UserCustom? userCustom = await userService.getUser(user.email!);
         if (userCustom != null) {
           userService.setCustomUser(userCustom);
-          customLoading.closeAlert(context);
+          //_token = await FirebaseMessaging.instance.getToken();
+          print("FirebaseMessaging token: $_token");
+          await FirebaseMessaging.instance.subscribeToTopic(userCustom.id);
           await storage.write(key: 'email', value: email);
           await storage.write(key: 'password', value: password);
+          customLoading.closeAlert(context);
           await Navigator.pushNamed(context, NavigationScreen.id);
           setState(() {
             loged = true;
@@ -174,8 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } else {
-      CustomAlert().showMyDialog(context, 'Email field',
-          'Malformed email');
+      CustomAlert().showMyDialog(context, 'Email field', 'Malformed email');
     }
   }
 
@@ -220,7 +277,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   checkLogIn2(BuildContext context) async {
     customLoading.showMyDialog(context);
-
+    _token = await FirebaseMessaging.instance.getToken();
+    print("FirebaseMessaging token: $_token");
     Position? pos = await Geolocator.getLastKnownPosition();
     if (pos != null) {
       latitude = pos.latitude;
@@ -264,20 +322,28 @@ class _LoginScreenState extends State<LoginScreen> {
           0);
 
       UserCustom? userCustom = await userService.addGoogleUser(userG);
-
-      if (userCustom != null)
+      if (userCustom != null) {
         userService.setCustomUser(userCustom);
-      else
-        userService.setCustomUser(userG);
 
+        //_token = await FirebaseMessaging.instance.getToken();
+        print("FirebaseMessaging token: $_token");
+        await FirebaseMessaging.instance.subscribeToTopic(userCustom.id);
+        await storage.write(key: 'email', value: emailController.text);
+        await storage.write(key: 'google', value: 'google');
+
+        customLoading.closeAlert(context);
+
+        await Navigator.pushNamed(context, NavigationScreen.id);
+        setState(() {
+          loged = true;
+          withGoogle = true;
+        });
+      } else {
+        CustomAlert().showMyDialog(context, 'Synchronization error',
+            'Error getting user ${userCustom!.email} from database');
+      }
+    } else {
       customLoading.closeAlert(context);
-      await storage.write(key: 'email', value: emailController.text);
-      await storage.write(key: 'google', value: 'google');
-      await Navigator.pushNamed(context, NavigationScreen.id);
-      setState(() {
-        loged = true;
-        withGoogle = true;
-      });
     }
   }
 
@@ -350,6 +416,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }*/
 
   logout2() async {
+    await FirebaseMessaging.instance.unsubscribeFromTopic(userService.userCustom.id);
     await FirebaseAuth.instance.signOut();
     await storage.delete(key: 'email');
     await storage.delete(key: 'password');
@@ -367,6 +434,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!kIsWeb) {
         await googleSignIn.signOut();
       }
+      await FirebaseMessaging.instance.unsubscribeFromTopic(userService.userCustom.id);
       await FirebaseAuth.instance.signOut();
       await storage.delete(key: 'email');
       await storage.delete(key: 'google');

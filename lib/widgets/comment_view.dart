@@ -18,7 +18,7 @@ class CommentView extends StatelessWidget {
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
           color: Colors.green.shade700.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(5)),
+          /*borderRadius: BorderRadius.circular(5)*/),
       child: Column(
         children: [
           (comment.images.length == 0)
@@ -38,13 +38,11 @@ class CommentView extends StatelessWidget {
                 ),
           Row(
             children: [
-              Text('Time: ', style: sectionText),
+              Text('Seen at: ', style: sectionText),
               Expanded(
-                child: Center(
-                  child: Text(
-                    DateFormat('HH:mm dd/MM/yyyy').format(comment.date),
-                    style: normalText,
-                  ),
+                child: Text(
+                  DateFormat('HH:mm dd/MM/yyyy').format(comment.date),
+                  style: normalText,
                 ),
               ),
             ],
@@ -52,7 +50,7 @@ class CommentView extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Last seen: ',
+                'Seen in: ',
                 style: sectionText,
               ),
               Coordinates(lat: comment.latitude, lon: comment.longitude),
@@ -70,8 +68,9 @@ class CommentView extends StatelessWidget {
             ],
           ),
           Container(
+            padding: EdgeInsets.all(5),
             decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(5)),
             child: Text(comment.description, style: normalText),
           )

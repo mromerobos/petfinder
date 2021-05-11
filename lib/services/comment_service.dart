@@ -26,7 +26,22 @@ class CommentService {
     return await commentDao.getComment(id);
   }
 
-  Future<List<Comment>> getComments(String id) async {
-    return await commentDao.getComments(id);
+  Future<List<Comment>> getCommentsForAnnouncement(String id) async {
+    List<Comment> result = await commentDao.getCommentsForAnnouncement(id);
+    result.sort((a, b) => (a.date.isBefore(b.date))? 1 : 0);
+    return result;
+  }
+
+  Future<List<Comment>> getComments(List<Announcement> listAnn) async {
+    List<String> announcements_ids = [];
+    for(Announcement announcement in listAnn) {
+      announcements_ids.add(announcement.id);
+    }
+    List<Comment> result = [];
+    List<Comment> comments = await commentDao.getComments();
+    for(Comment comment in comments) {
+      if(announcements_ids.contains(comment.announce_id)) result.add(comment);
+    }
+    return result;
   }
 }

@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:petfinder/models/comment.dart';
 
@@ -30,11 +31,27 @@ class CommentDao {
     return result;
   }
 
-  Future<List<Comment>> getComments(String id) async {
+  Future<List<Comment>> getCommentsForAnnouncement(String id) async {
     List<Comment> list = [];
     await FirebaseFirestore.instance
         .collection('comments')
         .where('announce_id', isEqualTo: id)
+        .get()
+        .then((QuerySnapshot snapshot) {
+      for (QueryDocumentSnapshot doc in snapshot.docs) {
+        Comment comment = Comment.fromJson(doc.data());
+        comment.id = doc.id;
+        list.add(comment);
+      }
+    });
+    return list;
+  }
+
+  Future<List<Comment>> getComments() async {
+    List<Comment> list = [];
+    await FirebaseFirestore.instance
+        .collection('comments')
+        //.where('announce_id', arrayContainsAny: ids)
         .get()
         .then((QuerySnapshot snapshot) {
       for (QueryDocumentSnapshot doc in snapshot.docs) {

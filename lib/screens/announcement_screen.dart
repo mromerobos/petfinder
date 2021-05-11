@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:petfinder/commons/arguments.dart';
@@ -16,6 +19,12 @@ import 'package:petfinder/widgets/comment_view.dart';
 import 'package:petfinder/widgets/coordinates.dart';
 import 'package:petfinder/widgets/icon_button_material.dart';
 import 'package:petfinder/widgets/top_bar_custom.dart';
+import 'package:share/share.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+
 
 import 'add_screen.dart';
 import 'other_user_screen.dart';
@@ -154,7 +163,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           ),
           Row(
             children: [
-              Text('Time: ', style: sectionText),
+              Text('Seen at: ', style: sectionText),
               Expanded(
                 child: Text(
                   DateFormat('HH:mm dd/MM/yyyy').format(announcement.date),
@@ -165,7 +174,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           ),
           Row(
             children: [
-              Text('Last seen: ', style: sectionText,),
+              Text('Seen on: ', style: sectionText,),
               Coordinates(
                   lat: announcement.latitude, lon: announcement.longitude),
             ],
@@ -229,7 +238,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   }
 
   Future<void> getCommentsAndFollows() async {
-    commentsList = await commentService.getComments(announcement.id);
+    commentsList = await commentService.getCommentsForAnnouncement(announcement.id);
     Follow? follow = await followService.isFollowAnnounce(
         userService.userCustom.email, announcement.id);
     if (follow != null) {
@@ -245,7 +254,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       Comment? comment = await commentService.getComment(id);
       if (comment != null) {
         setState(() {
-          commentsList.add(comment);
+          commentsList.insert(0, comment);
         });
       } else {
         CustomAlert().showMyDialog(context, 'Comment created',
@@ -280,7 +289,11 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     }
   }
 
-  shareInfo() {}
+  shareInfo() async {
+    //await Share.shareFiles(await _fileFromImageUrl(), text: announcement.description, subject: announcement.title);
+    //await Share.shareFiles( await _filePathFromUrl(), text: announcement.description, subject: announcement.title);
+    downloadFileExampleAndShare();
+  }
 
   goToOtherUserProfile(String email) async {
     UserCustom? user = await userService.getUser(email);
@@ -295,4 +308,21 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   goToUserProfile() {
     Navigator.pushNamed(context, UserScreen.id);
   }
+
+  Future<void> downloadFileExampleAndShare() async {
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    File downloadToFile = File('${appDocDir.path}/share-image.png');
+    String imageRef = announcement.images.first.split('o/').last;
+    imageRef = imageRef.split('?').first.replaceAll('%2F', '/');
+    try {
+      await FirebaseStorage.instance
+          .ref(imageRef)
+          .writeToFile(downloadToFile);
+      await Share.shareFiles( [downloadToFile.path], text: announcement.description, subject: announcement.title);
+    } on FirebaseException catch (e) {
+      CustomAlert()
+          .showMyDialog(context, 'Erros downloading image to share', e.message.toString());
+    }
+  }
+  
 }
