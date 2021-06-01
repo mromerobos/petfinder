@@ -58,6 +58,8 @@ class _MapSearchState extends State<MapSearch>
               target: _center,
               zoom: 15.0,
             ),
+            myLocationButtonEnabled: true,
+            myLocationEnabled: true,
           ),
         ),
       ],
