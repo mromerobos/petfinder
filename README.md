@@ -2,7 +2,9 @@
 
 A new Flutter application for PFM.
 
-Este obra está bajo una licencia de Creative Commons Reconocimiento-NoComercial-SinObraDerivada 3.0 España. (https://creativecommons.org/licenses/by-nc-nd/3.0/es/)
+This work is under a Commons Reconocimiento-NoComercial-SinObraDerivada 3.0 Spain license. (https://creativecommons.org/licenses/by-nc-nd/3.0/es/)
+
+Some of the images that appear in the project have been provided by the Icons8 page. (https://icons8.com/)
 
 ## Getting Started
 
