@@ -2,6 +2,8 @@
 
 A new Flutter application for PFM.
 
+Este obra está bajo una licencia de Creative Commons Reconocimiento-NoComercial-SinObraDerivada 3.0 España. (https://creativecommons.org/licenses/by-nc-nd/3.0/es/)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
